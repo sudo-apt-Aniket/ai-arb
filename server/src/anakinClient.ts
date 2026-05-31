@@ -26,8 +26,8 @@ export class AnakinClient {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": this.config.ANAKIN_API_KEY,
-        Authorization: `Bearer ${this.config.ANAKIN_API_KEY}`
+        "X-API-Key": this.config.ANAKIN_API_KEY!,
+        Authorization: `Bearer ${this.config.ANAKIN_API_KEY!}`
       },
       body: JSON.stringify(
         buildAnakinTaskRequestBody({
@@ -54,8 +54,8 @@ export class AnakinClient {
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       const response = await fetch(`${this.wireBaseUrl}/jobs/${jobId}`, {
         headers: {
-          "X-API-Key": this.config.ANAKIN_API_KEY,
-          Authorization: `Bearer ${this.config.ANAKIN_API_KEY}`
+          "X-API-Key": this.config.ANAKIN_API_KEY!,
+          Authorization: `Bearer ${this.config.ANAKIN_API_KEY!}`
         }
       });
 
@@ -96,8 +96,8 @@ export class AnakinClient {
 
     const response = await fetch(`${this.wireBaseUrl}/search?${params.toString()}`, {
       headers: {
-        "X-API-Key": this.config.ANAKIN_API_KEY,
-        Authorization: `Bearer ${this.config.ANAKIN_API_KEY}`
+        "X-API-Key": this.config.ANAKIN_API_KEY!,
+        Authorization: `Bearer ${this.config.ANAKIN_API_KEY!}`
       }
     });
 
