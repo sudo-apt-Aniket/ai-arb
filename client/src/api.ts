@@ -89,6 +89,20 @@ export async function getOpportunityDetail(id: string): Promise<{ opportunity: O
   return request(`/api/opportunities/${encodeURIComponent(id)}`);
 }
 
+export interface ResaleDraft {
+  resaleTitle: string;
+  suggestedPrice: number;
+  description: string;
+  seoTags: string[];
+  sellerTips: string;
+}
+
+export async function getResaleDraft(id: string): Promise<ResaleDraft> {
+  return request(`/api/opportunities/${encodeURIComponent(id)}/resale-draft`, {
+    method: "POST"
+  });
+}
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
   if (!response.ok) {

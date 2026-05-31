@@ -1159,3 +1159,199 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* Arbitrage Execution Workflow Styles */
+.arbitrageWorkflowSection {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(0, 245, 255, 0.15);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 24px 0;
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.03);
+}
+
+.arbitrageWorkflowSection h3 {
+  font-size: 0.9rem;
+  color: #00f5ff;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
+}
+
+.workflowStep {
+  border-left: 2px solid rgba(0, 245, 255, 0.3);
+  padding-left: 12px;
+}
+
+.workflowStep strong {
+  display: block;
+  font-size: 0.82rem;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.workflowStep p {
+  font-size: 0.78rem;
+  color: #91a8bf;
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+}
+
+.executeLinkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(90deg, #ff2bd6, #00f5ff);
+  border: none;
+  border-radius: 4px;
+  color: #06080f;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.15);
+}
+
+.executeLinkButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
+}
+
+.draftGenerating {
+  font-size: 0.78rem;
+  color: #81ffe8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.spinIcon {
+  animation: spin 1.5s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.draftError {
+  color: #ff8484;
+  font-size: 0.76rem;
+  margin-top: 10px;
+  background: rgba(255, 132, 132, 0.1);
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 132, 132, 0.2);
+}
+
+.resaleDraftDetails {
+  margin-top: 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.draftField {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.draftField:last-child {
+  margin-bottom: 0;
+}
+
+.fieldLabel {
+  font-size: 0.65rem;
+  font-weight: bold;
+  color: #ff2bd6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.copyFieldRow {
+  display: flex;
+  gap: 8px;
+}
+
+.copyFieldRow input {
+  flex: 1;
+  height: 30px;
+  background: #03060c;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #f4f7fb;
+  font-size: 0.75rem;
+  padding: 0 8px;
+  outline: none;
+}
+
+.copyBtn {
+  height: 30px;
+  padding: 0 10px;
+  background: rgba(0, 245, 255, 0.1);
+  border: 1px solid rgba(0, 245, 255, 0.35);
+  border-radius: 4px;
+  color: #00f5ff;
+  font-size: 0.7rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copyBtn:hover {
+  background: rgba(0, 245, 255, 0.2);
+}
+
+.resellNet {
+  font-size: 0.72rem;
+  color: #8fa0b5;
+}
+
+.draftField strong {
+  font-size: 1.1rem;
+  color: #81ffe8;
+}
+
+.draftField textarea {
+  background: #03060c;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #cbd5e1;
+  font-family: inherit;
+  font-size: 0.76rem;
+  padding: 8px;
+  resize: vertical;
+  outline: none;
+  line-height: 1.4;
+}
+
+.seoTagsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tagBadge {
+  font-size: 0.65rem;
+  color: #00f5ff;
+  background: rgba(0, 245, 255, 0.05);
+  border: 1px solid rgba(0, 245, 255, 0.15);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.tipsText {
+  font-size: 0.76rem;
+  color: #91a8bf;
+  margin: 0;
+  line-height: 1.4;
+  font-style: italic;
+}

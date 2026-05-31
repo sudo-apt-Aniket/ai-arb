@@ -8,10 +8,12 @@ import {
   triggerScan,
   getLogs,
   searchWireActions,
+  getResaleDraft,
   type Health,
   type Opportunity,
   type ScanRun,
-  type DiscoveredAction
+  type DiscoveredAction,
+  type ResaleDraft
 } from "./api";
 
 type SortKey = "roiPercent" | "netProfit" | "confidence" | "askPrice";
@@ -130,6 +132,9 @@ export function App() {
   const [searchParamsJson, setSearchParamsJson] = useState('{"query":"rtx 4070 graphics card used","limit":20}');
   const [activeProvider, setActiveProvider] = useState<string>("nvidia");
   const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(null);
+  const [resaleDraft, setResaleDraft] = useState<ResaleDraft | null>(null);
+  const [isGeneratingDraft, setIsGeneratingDraft] = useState(false);
+  const [draftError, setDraftError] = useState("");
 
   // Live Console Logs & Stepper States
   const [logs, setLogs] = useState<string[]>([]);
@@ -359,11 +364,28 @@ export function App() {
   async function openDetail(opportunity: Opportunity) {
     setSelected(opportunity);
     setRawDetail(null);
+    setResaleDraft(null);
+    setDraftError("");
     try {
       const detail = await getOpportunityDetail(opportunity.id);
       setRawDetail(detail.rawListing);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load detail");
+    }
+  }
+
+  async function handleGenerateResaleDraft() {
+    if (!selected) return;
+    setIsGeneratingDraft(true);
+    setDraftError("");
+    setResaleDraft(null);
+    try {
+      const draft = await getResaleDraft(selected.id);
+      setResaleDraft(draft);
+    } catch (err) {
+      setDraftError(err instanceof Error ? err.message : "Failed to generate resale draft");
+    } finally {
+      setIsGeneratingDraft(false);
     }
   }
 
@@ -762,6 +784,94 @@ export function App() {
 
             <h3>Recommended Action</h3>
             <p className="actionText">{selected.recommendedAction}</p>
+
+            {/* Real Arbitrage Execution Section */}
+            <div className="arbitrageWorkflowSection">
+              <h3>⚡ Execute Arbitrage Workflow</h3>
+              <div className="workflowStep">
+                <strong>Step 1: Acquire Asset</strong>
+                <p>Purchase the undervalued item from the source platform to secure your spread.</p>
+                <a
+                  href={selected.listingUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="executeLinkButton"
+                >
+                  Go to Source Listing <ExternalLink size={14} />
+                </a>
+              </div>
+              
+              <div className="workflowStep" style={{ marginTop: "16px" }}>
+                <strong>Step 2: List for Resale</strong>
+                <p>Generate optimized listings for reseller platforms using AI reasoners.</p>
+                
+                {!resaleDraft && !isGeneratingDraft && (
+                  <button className="primaryButton" onClick={handleGenerateResaleDraft}>
+                    Generate AI Resale Draft
+                  </button>
+                )}
+
+                {isGeneratingDraft && (
+                  <div className="draftGenerating">
+                    <RefreshCw className="spinIcon" size={16} /> Generating optimized draft listing...
+                  </div>
+                )}
+
+                {draftError && <div className="draftError">{draftError}</div>}
+
+                {resaleDraft && (
+                  <div className="resaleDraftDetails">
+                    <div className="draftField">
+                      <span className="fieldLabel">Recommended Resale Title</span>
+                      <div className="copyFieldRow">
+                        <input readOnly value={resaleDraft.resaleTitle} />
+                        <button 
+                          className="copyBtn" 
+                          onClick={() => {
+                            navigator.clipboard.writeText(resaleDraft.resaleTitle);
+                            alert("Title copied to clipboard!");
+                          }}
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="draftField">
+                      <span className="fieldLabel">Target Resell Price</span>
+                      <strong>{money.format(resaleDraft.suggestedPrice)}</strong>
+                      <span className="resellNet"> (Est. Profit: {money.format(resaleDraft.suggestedPrice - selected.askPrice - selected.feesEstimate - selected.shippingEstimate)})</span>
+                    </div>
+
+                    <div className="draftField">
+                      <span className="fieldLabel">AI Reseller Description</span>
+                      <textarea readOnly rows={6} value={resaleDraft.description} />
+                      <button 
+                        className="copyBtn" 
+                        onClick={() => {
+                          navigator.clipboard.writeText(resaleDraft.description);
+                          alert("Description copied to clipboard!");
+                        }}
+                      >
+                        Copy Description
+                      </button>
+                    </div>
+
+                    <div className="draftField">
+                      <span className="fieldLabel">Target SEO Tags</span>
+                      <div className="seoTagsList">
+                        {resaleDraft.seoTags.map(tag => <span key={tag} className="tagBadge">#{tag}</span>)}
+                      </div>
+                    </div>
+
+                    <div className="draftField">
+                      <span className="fieldLabel">Pro Reselling Tips</span>
+                      <p className="tipsText">{resaleDraft.sellerTips}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
 
             <h3>Raw Listing Metadata</h3>
             <pre>{JSON.stringify(rawDetail, null, 2)}</pre>

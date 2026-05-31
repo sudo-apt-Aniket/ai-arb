@@ -161,6 +161,77 @@ export function createApp(
     res.json(detail);
   });
 
+  app.post("/api/opportunities/:id/resale-draft", async (req, res, next) => {
+    try {
+      const opportunityDetail = db.getOpportunity(req.params.id);
+      if (!opportunityDetail) {
+        res.status(404).json({ error: "Opportunity not found" });
+        return;
+      }
+      const { opportunity } = opportunityDetail;
+      const apiKey = config.GEMINI_API_KEY;
+
+      if (apiKey) {
+        try {
+          const prompt = `You are a professional e-commerce reseller. Generate a high-converting reseller listing for the following item:
+Title: "${opportunity.title}"
+Platform: "${opportunity.sourcePlatform}"
+Ask Price: $${opportunity.askPrice}
+Estimated Fair Market Value (MSRP/FMV): $${opportunity.estimatedMarketValue}
+Condition: "${opportunity.riskLevel === "low" ? "Like New / Excellent" : "Good / Fair"}"
+
+Provide your output in strict JSON format matching this shape:
+{
+  "resaleTitle": "optimized listing title",
+  "suggestedPrice": number,
+  "description": "compelling, formatted listing description with specs and friendly terms",
+  "seoTags": ["tag1", "tag2", "tag3"],
+  "sellerTips": "practical advice for quick sale"
+}
+Do not include markdown, prose, or comments outside the JSON.`;
+
+          const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                responseMimeType: "application/json"
+              }
+            })
+          });
+
+          if (apiResponse.ok) {
+            const json = await apiResponse.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+            const content = json.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (content) {
+              res.json(JSON.parse(content.trim()));
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn("⚠️ [DRAFT GEN] Live Gemini draft generation failed, using fallback:", e);
+        }
+      }
+
+      // Local Failsafe Fallback Draft
+      const suggestedPrice = Math.round(opportunity.estimatedMarketValue * 0.95);
+      res.json({
+        resaleTitle: `🔥 [DEAL] ${opportunity.title} - Perfect Resell Condition`,
+        suggestedPrice,
+        description: `Up for sale is a high-value listing in pristine, verified condition:\n\n` +
+          `• Item: ${opportunity.title}\n` +
+          `• Verified Condition: ${opportunity.riskLevel === "low" ? "Excellent (Inspected by AI)" : "Good (Tested)"}\n` +
+          `• Target MSRP / Value: $${opportunity.estimatedMarketValue}\n\n` +
+          `Originally sourced from ${opportunity.sourcePlatform}. Ideal for reselling or upgrading your setup. Optics, aesthetics, and functions are completely checked and certified. Priced at a discount to sell fast!`,
+        seoTags: [opportunity.sourcePlatform.toLowerCase(), "deal", "arbitrage", "graphics-card", "photography"],
+        sellerTips: `List this item on local classifieds (Facebook Marketplace, Craigslist) for cash to maximize margins, or use eBay with a "Buy It Now" price of $${suggestedPrice} and allow best offers.`
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
   const staticDir = path.resolve("dist/client");
   app.use(express.static(staticDir));
   app.get("*", (_req, res) => {
