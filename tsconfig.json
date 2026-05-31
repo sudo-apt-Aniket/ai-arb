@@ -16,5 +16,5 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["client/src", "server/src", "tests", "vite.config.ts", "vitest.config.ts"]
+  "include": ["client/src", "server/src", "tests", "vite.config.ts", "vitest.config.ts", "api"]
 }
