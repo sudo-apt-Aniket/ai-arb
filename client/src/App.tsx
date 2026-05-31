@@ -197,17 +197,73 @@ export function App() {
     handleSearchActions();
   }, []);
 
+  function useStaticFallbackActions() {
+    const fallbacks: DiscoveredAction[] = [
+      {
+        action_id: "am_search_products",
+        name: "Amazon Search Products",
+        description: "Scrapes product titles, prices, and images from Amazon search results.",
+        catalog_slug: "Amazon"
+      },
+      {
+        action_id: "ebay_search_deals",
+        name: "eBay Realtime Product Search",
+        description: "Scrapes auctions, buy-it-now prices, and shipping fees from eBay.",
+        catalog_slug: "eBay"
+      },
+      {
+        action_id: "craigslist_crawler",
+        name: "Craigslist Local Classifieds",
+        description: "Crawls local Craigslist items for camera and GPU cash listings.",
+        catalog_slug: "Craigslist"
+      },
+      {
+        action_id: "walmart_scraper",
+        name: "Walmart Marketplace Scraper",
+        description: "Fetches price data and conditions from Walmart online catalog.",
+        catalog_slug: "Walmart"
+      }
+    ];
+
+    const filtered = fallbacks.filter(
+      item =>
+        item.name.toLowerCase().includes(actionQuery.toLowerCase()) ||
+        item.catalog_slug?.toLowerCase().includes(actionQuery.toLowerCase()) ||
+        item.action_id.toLowerCase().includes(actionQuery.toLowerCase())
+    );
+
+    const result = filtered.length > 0 ? filtered : fallbacks;
+    setDiscoveredActions(result);
+    
+    // Automatically set selected action if not set
+    if (result.length > 0 && (!selectedAction || !result.some(a => a.action_id === selectedAction))) {
+      setSelectedAction(result[0].action_id);
+    }
+  }
+
   async function handleSearchActions() {
     try {
       const res = await searchWireActions(actionQuery);
-      if (res && Array.isArray(res.data)) {
+      if (res && Array.isArray(res.data) && res.data.length > 0) {
         setDiscoveredActions(res.data);
-        if (res.data.length > 0 && !selectedAction) {
+        if (!selectedAction || !res.data.some(a => a.action_id === selectedAction)) {
           setSelectedAction(res.data[0].action_id);
         }
+      } else {
+        useStaticFallbackActions();
       }
     } catch (err) {
-      // ignore
+      useStaticFallbackActions();
+    }
+  }
+
+  function handleSelectCatalogItem(item: CatalogItem) {
+    if (selectedCatalogId === item.id) {
+      setSelectedCatalogId(null);
+    } else {
+      setSelectedCatalogId(item.id);
+      setSearchParamsJson(JSON.stringify(item.searchParams, null, 2));
+      setSelectedAction(item.actionId);
     }
   }
 
@@ -423,7 +479,7 @@ export function App() {
               <div
                 key={item.id}
                 className={`catalogCard ${isSelected ? "selected" : ""}`}
-                onClick={() => setSelectedCatalogId(isSelected ? null : item.id)}
+                onClick={() => handleSelectCatalogItem(item)}
               >
                 <div className="catalogCardImageWrapper">
                   <img src={item.image} alt={item.name} className="catalogCardImage" />
