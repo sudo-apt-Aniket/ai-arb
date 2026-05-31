@@ -249,7 +249,35 @@ export function parseStrictAppraisalJson(content: string): AppraisalResult[] {
   if (!sanitized.startsWith("[") || !sanitized.endsWith("]")) {
     throw new Error("Appraisal response must be a strict JSON array");
   }
-  return appraisalSchema.parse(JSON.parse(sanitized));
+
+  const rawArray = JSON.parse(sanitized);
+  if (!Array.isArray(rawArray)) {
+    throw new Error("Appraisal response must be a JSON array");
+  }
+
+  const normalized = rawArray.map((item: any) => {
+    if (item && typeof item === "object") {
+      // Resilient riskLevel normalizer
+      let risk = String(item.riskLevel || "medium").toLowerCase();
+      if (risk.includes("low")) {
+        item.riskLevel = "low";
+      } else if (risk.includes("high")) {
+        item.riskLevel = "high";
+      } else {
+        item.riskLevel = "medium";
+      }
+
+      // Safe number conversion fallbacks
+      item.estimatedMarketValue = Math.max(0.01, Number(item.estimatedMarketValue) || 0.01);
+      item.feesEstimate = Math.max(0, Number(item.feesEstimate) || 0);
+      item.shippingEstimate = Math.max(0, Number(item.shippingEstimate) || 0);
+      item.confidence = Math.min(1, Math.max(0, Number(item.confidence) || 0.5));
+      item.detectedIssues = Array.isArray(item.detectedIssues) ? item.detectedIssues : [];
+    }
+    return item;
+  });
+
+  return appraisalSchema.parse(normalized);
 }
 
 export function buildOpportunities(input: {
