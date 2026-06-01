@@ -353,7 +353,7 @@ class MockDatabaseSync implements SQLiteDatabase {
   }
 }
 
-const require = createRequire(import.meta.url);
+const require = createRequire(process.cwd());
 let DatabaseSyncClass: new (path: string) => SQLiteDatabase;
 
 try {
