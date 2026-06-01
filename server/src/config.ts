@@ -20,7 +20,20 @@ const envSchema = z.object({
   DATABASE_PATH: z.string().default("data/ai-arb.sqlite")
 });
 
-const parsed = envSchema.parse(process.env);
+let parsed: z.infer<typeof envSchema>;
+
+try {
+  const envCopy = { ...process.env };
+  for (const key of Object.keys(envCopy)) {
+    if (envCopy[key] === "") {
+      delete envCopy[key];
+    }
+  }
+  parsed = envSchema.parse(envCopy);
+} catch (error) {
+  console.error("⚠️ [CONFIG] Zod environment validation failed! Falling back to defaults where possible. Error details:", error);
+  parsed = envSchema.parse({});
+}
 
 function parseSearchParams(raw: string) {
   try {
@@ -30,8 +43,8 @@ function parseSearchParams(raw: string) {
     }
     return value as Record<string, unknown>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "invalid JSON";
-    throw new Error(`Invalid ANAKIN_SEARCH_PARAMS_JSON: ${message}`);
+    console.error("⚠️ [CONFIG] Invalid ANAKIN_SEARCH_PARAMS_JSON, using fallback:", error);
+    return { query: "used camera", limit: 20 };
   }
 }
 
