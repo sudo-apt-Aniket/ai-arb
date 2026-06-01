@@ -10,7 +10,7 @@
     "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
     "dev:server": "tsx watch server/src/index.ts",
     "dev:client": "vite --host 127.0.0.1",
-    "build": "tsc -p tsconfig.json && vite build",
+    "build": "esbuild server/src/vercel-entry.ts --bundle --platform=node --format=esm --target=node22 --packages=external --outfile=api/index.bundled.js && tsc -p tsconfig.json && vite build",
     "start": "tsx server/src/index.ts",
     "test": "vitest run",
     "test:watch": "vitest"
